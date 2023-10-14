@@ -9,11 +9,12 @@ on:
   pull_request:
     branches: [ "master" ]
 
+env:
+  nodejs_version: '18.x'
+
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
         node-version: [16.x, 18.x, 20.x]
@@ -34,6 +35,18 @@ jobs:
         name: site
         path: dist/zippy-angles
   
+  build_docker:
+    runs-on: ubuntu-latest
+
+    steps:
+        - uses: actions/checkout@v3
+        - name: Use Node.js ${{ env.node_version }}
+          uses: actions/setup-node@v3
+          with:
+            node-version: ${{ env.node_version }}
+            cache: 'npm'
+        - run: docker build .
+
   deploy_sdf:
     if: github.event_name == 'push'
     needs: build
@@ -45,16 +58,13 @@ jobs:
         name: site
         path: www
     
-    - uses: easingthemes/ssh-deploy@main
-      with:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
-        ARGS: "-rlgoDzvc -i"
-        SOURCE: "www/"
-        REMOTE_HOST: sdf.org
-        REMOTE_USER: zippy1981
-        TARGET: /www/nz/z/zippy1981
-        SCRIPT_AFTER: |
-          # fix permissions
-          mkhomepg -p
+    - name: 🌈 Deploy with ssh...
+        uses: sebastianjnuwu/ssh-action-deploy@v3
+        with:
+          IP: ${{ secrets.IP }}
+          USER: ${{ secrets.USER }}
+          KEY: ${{ secrets.KEY }}
+          FOLDER: "/root/.deploy"
+          RUN: mkhomepg -p
       
               
