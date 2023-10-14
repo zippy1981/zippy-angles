@@ -49,7 +49,7 @@ jobs:
           with:
             node-version: ${{ env.node_version }}
             cache: 'npm'
-        - run: docker build . -t ${{ env.docker_acr }}/zippy-angles
+        - run: docker build . -t ${{ env.docker_acr }}/zippy-angles:${{ github.sha }}
         - uses: azure/docker-login@v1
           if: github.event_name == 'push'
           with:
