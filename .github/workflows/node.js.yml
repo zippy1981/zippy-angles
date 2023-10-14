@@ -16,7 +16,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [14.x, 16.x, 18.x]
+        node-version: [16.x, 18.x, 20.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
@@ -34,7 +34,7 @@ jobs:
         name: site
         path: dist/zippy-angles
   
-  deploy:
+  deploy_sdf:
     if: github.event_name == 'push'
     needs: build
     runs-on: ubuntu-latest
@@ -44,5 +44,10 @@ jobs:
       with:
         name: site
         path: www
+    
+    - run: |
+      # TODO: this doesn't remove removed files so use rsync
+      scp -r www/ zippy1981@sdf.org/www/nz/z/zippy1981
+      ssh zippy1981@sdf.org mkhomepg -p
     
             
