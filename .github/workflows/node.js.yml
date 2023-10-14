@@ -58,7 +58,7 @@ jobs:
             password: ${{ secrets.ACR_PASSWORD }}
         - name: publish to acr
           if: github.event_name == 'push'
-          run: docker push contoso.azurecr.io/zippy-angles:${{ github.sha }}
+          run: docker push ${{ env.docker_acr }}/zippy-angles:${{ github.sha }}
 
   deploy_sdf:
     if: github.event_name == 'push'
