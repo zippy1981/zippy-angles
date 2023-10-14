@@ -10,6 +10,8 @@ on:
     branches: [ "master" ]
 
 env:
+  docker_acr: 'zippymalvern.azurecr.io'
+  acr_login: 'zippymalvern'
   nodejs_version: '18.x'
 
 jobs:
@@ -47,7 +49,16 @@ jobs:
           with:
             node-version: ${{ env.node_version }}
             cache: 'npm'
-        - run: docker build .
+        - run: docker build . -t zippy-angles
+        - uses: azure/docker-login@v1
+          if: github.event_name == 'push'
+          with:
+            login-server: ${{ env.docker_acr }} # default: index.docker.io
+            username: '${{ env.acr_login }}'
+            password: ${{ secrets.ACR_PASSWORD }}
+        - name: publish to acr
+          if: github.event_name == 'push'
+          run: docker push contoso.azurecr.io/zippy-angles:${{ github.sha }}
 
   deploy_sdf:
     if: github.event_name == 'push'
